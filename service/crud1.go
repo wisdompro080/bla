@@ -23,17 +23,16 @@ func Create1(c *gin.Context) {
 		log.Fatal(err)
 	}
 	collectionName := config.Config.Arango.Collections.User
-	query := "INSERT {name:" + "'" + details.Name + "'" + ",id:'" + details.Id + "'} IN " + collectionName
-	fmt.Println(query)
+	bytecode,err:=json.Marshal(details)
+	query := "INSERT"+ string(bytecode) +"IN " + collectionName
+	//query := "INSERT {name:" + "'" + details.Name + "'" + ",id:'" + details.Id + "'} IN " + collectionName
 	_, _ = db.Query(ctx, query, nil)
 }
 func Read1(c *gin.Context) {
-	DbConnection()
 	_, db := DbConnection()
 	ctx := context.Background()
 	query := "FOR d IN Documents RETURN d"
 	cursor, err := db.Query(ctx, query, nil)
-
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -87,15 +86,17 @@ func Remove1(c *gin.Context) {
 	log.Info("Removed Succesfully")
 }
 func Update1(c *gin.Context) {
-	DbConnection()
 	_, db := DbConnection()
 	ctx := context.Background()
 	var doc models.Document
 	_ = c.ShouldBindWith(&doc, binding.JSON)
 	key := c.Param("id")
 	collectionName := config.Config.Arango.Collections.User
-	query := "REPLACE'" + key + "'WITH{id:'" + doc.Id + "',name:'" + doc.Name + "'} IN " + collectionName
-	_, err := db.Query(ctx, query, nil)
+      byteData,_:=json.Marshal(doc)
+
+      query:="for i in "+collectionName+" filter i._key=='"+key+"' UPDATE i with"+string(byteData)+"IN "+collectionName
+
+		_, err := db.Query(ctx, query, nil)
 	if err != nil {
 		log.Fatal("error in removal", err)
 	}
