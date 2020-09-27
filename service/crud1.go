@@ -53,6 +53,27 @@ func Read1(c *gin.Context) {
 		c.String(200, string(jdoc))
 	}
 }
+func ReadId1(c *gin.Context) {
+	_,db:=DbConnection()
+	collectionName:=config.Config.Arango.Collections.User
+	key:=c.Param("id")
+	fmt.Println(key)
+	ctx:=context.Background()
+	query:="for i in "+collectionName+" filter i._key=='"+key+"' return i"
+	cursor,err:=db.Query(ctx,query,nil)
+	if(err!=nil){
+		log.Fatal("key not present")
+	}
+	var doc models.Document
+	_,err=cursor.ReadDocument(ctx,&doc)
+	bytecode,err:=json.Marshal(doc)
+	if(err!=nil){
+		log.Fatal("key not present")
+	}
+	c.String(200,string(bytecode))
+	cursor.Close()
+
+}
 func Remove1(c *gin.Context) {
 	_, db := DbConnection()
 	ctx := context.Background()
