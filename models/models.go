@@ -18,7 +18,9 @@ type Config struct {
 	LogLevel log.Level
 }
 type Document struct {
-	Time string `json:"time,omitempty"`
-	Id   string `json:"id,omitempty"`
-	Name string `json:"name,omitempty"`
+	Key  string `json:"_key"`
+	Time string `json:"time" binding:"required"`
+	Id   string `json:"id" binding:"required"`
+	Name string `json:"name" binding:"required"`
+
 }

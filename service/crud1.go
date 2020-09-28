@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"github.com/arangodb/go-driver"
@@ -10,21 +11,30 @@ import (
 	log "github.com/sirupsen/logrus"
 	"test/models"
 	"time"
-
+    "crypto/rand"
 	//log "github.com/sirupsen/logrus"
 	"test/config"
+
 )
 
 func Create1(c *gin.Context) {
 	_, db := DbConnection()
 	ctx := context.Background()
 	var details models.Document
-	err := c.BindJSON(&details)
-
 	t := time.Now()
 	details.Time = t.Format(time.RFC3339)
+
+	keyBytes := make([]byte, 4)
+	_, err := rand.Read(keyBytes)
+	if err != nil {
+		// handle error here
+	}
+	key:=hex.EncodeToString(keyBytes)
+	details.Key=key
 	a, _ := json.Marshal(details)
 	fmt.Println(string(a))
+	err= c.BindJSON(&details)
+
 
 	if err != nil {
 		log.Fatal(err)
