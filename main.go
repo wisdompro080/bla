@@ -12,7 +12,6 @@ func init() {
 }
 func main() {
 	route := gin.Default()
-
 	route.POST("/create", service.Create1)
 	route.GET("/", service.Read1)
 	route.GET("/:id",service.ReadId1)

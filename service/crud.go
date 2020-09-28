@@ -13,7 +13,7 @@ import (
 func Create(c *gin.Context) {
 	col, _ := DbConnection()
 	ctx := context.Background()
-	var p models.Document
+	var p models.StudentDetails
 	err := c.ShouldBindWith(&p, binding.JSON)
 	if err != nil {
 		log.Fatal("Binding not successfull", err)
@@ -37,7 +37,7 @@ func Read(c *gin.Context) {
 	}
 	defer cursor.Close()
 	for {
-		var doc models.Document
+		var doc models.StudentDetails
 		_, err := cursor.ReadDocument(ctx, &doc)
 		if driver.IsNoMoreDocuments(err) {
 			break
@@ -73,7 +73,7 @@ func Update(c *gin.Context) {
 	//patch := make(map[string]interface{})
 	//patch["name"] = "raul"
 	//patch["Id"] = "234"
-	var doc models.Document
+	var doc models.StudentDetails
 	_ = c.ShouldBindWith(&doc, binding.JSON)
 	key := c.Param("id")
 	_, err := col.UpdateDocument(ctx, key, doc)

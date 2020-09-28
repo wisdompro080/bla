@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"crypto/rand"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
@@ -11,16 +12,14 @@ import (
 	log "github.com/sirupsen/logrus"
 	"test/models"
 	"time"
-    "crypto/rand"
 	//log "github.com/sirupsen/logrus"
 	"test/config"
-
 )
 
 func Create1(c *gin.Context) {
 	_, db := DbConnection()
 	ctx := context.Background()
-	var details models.Document
+	var details models.StudentDetails
 	t := time.Now()
 	details.Time = t.Format(time.RFC3339)
 
@@ -29,12 +28,11 @@ func Create1(c *gin.Context) {
 	if err != nil {
 		// handle error here
 	}
-	key:=hex.EncodeToString(keyBytes)
-	details.Key=key
+	key := hex.EncodeToString(keyBytes)
+	details.Key = key
 	a, _ := json.Marshal(details)
 	fmt.Println(string(a))
-	err= c.BindJSON(&details)
-
+	err = c.BindJSON(&details)
 
 	if err != nil {
 		log.Fatal(err)
@@ -57,7 +55,7 @@ func Read1(c *gin.Context) {
 	}
 	defer cursor.Close()
 	for {
-		var doc models.Document
+		var doc models.StudentDetails
 		_, err := cursor.ReadDocument(ctx, &doc)
 		if driver.IsNoMoreDocuments(err) {
 			break
@@ -75,15 +73,20 @@ func ReadId1(c *gin.Context) {
 	_, db := DbConnection()
 	collectionName := config.Config.Arango.Collections.User
 	key := c.Param("id")
-	fmt.Println(key)
 	ctx := context.Background()
 	query := "for i in " + collectionName + " filter i._key=='" + key + "' return i"
+	fmt.Println(query)
 	cursor, err := db.Query(ctx, query, nil)
 	if err != nil {
 		log.Fatal("key not present")
 	}
-	var doc models.Document
+
+	var doc models.StudentDetails
 	_, err = cursor.ReadDocument(ctx, &doc)
+	k := driver.IsNoMoreDocuments(err)
+	if k == true {
+		log.Fatal("no document found")
+	}
 	bytecode, err := json.Marshal(doc)
 	if err != nil {
 		log.Fatal("key not present")
@@ -107,7 +110,7 @@ func Remove1(c *gin.Context) {
 func Update1(c *gin.Context) {
 	_, db := DbConnection()
 	ctx := context.Background()
-	var doc models.Document
+	var doc models.StudentDetails
 	_ = c.ShouldBindWith(&doc, binding.JSON)
 	key := c.Param("id")
 	collectionName := config.Config.Arango.Collections.User
