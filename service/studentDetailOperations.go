@@ -75,7 +75,7 @@ func ReadId1(c *gin.Context) {
 	key := c.Param("id")
 	ctx := context.Background()
 	query := "for i in " + collectionName + " filter i._key=='" + key + "' return i"
-	fmt.Println(query)
+	//fmt.Println(query)
 	cursor, err := db.Query(ctx, query, nil)
 	if err != nil {
 		log.Fatal("key not present")
