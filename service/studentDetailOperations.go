@@ -5,7 +5,6 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"encoding/json"
-	"fmt"
 	"github.com/arangodb/go-driver"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
@@ -17,7 +16,7 @@ import (
 )
 
 func Create1(c *gin.Context) {
-	_, db := DbConnection()
+	 db := config.Connection.Db
 	ctx := context.Background()
 	var details models.StudentDetails
 	t := time.Now()
@@ -30,8 +29,7 @@ func Create1(c *gin.Context) {
 	}
 	key := hex.EncodeToString(keyBytes)
 	details.Key = key
-	a, _ := json.Marshal(details)
-	fmt.Println(string(a))
+	_, _ = json.Marshal(details)
 	err = c.BindJSON(&details)
 
 	if err != nil {
@@ -39,14 +37,13 @@ func Create1(c *gin.Context) {
 	}
 	collectionName := config.Config.Arango.Collections.User
 	bytecode, err := json.Marshal(details)
-	fmt.Println(string(bytecode))
 	query := "INSERT" + string(bytecode) + "IN " + collectionName
 
 	_, _ = db.Query(ctx, query, nil)
 }
 
 func Read1(c *gin.Context) {
-	_, db := DbConnection()
+	 db :=config.Connection.Db
 	ctx := context.Background()
 	query := "FOR d IN Documents RETURN d"
 	cursor, err := db.Query(ctx, query, nil)
@@ -66,11 +63,13 @@ func Read1(c *gin.Context) {
 		if err != nil {
 			log.Fatal("marshal error ", err)
 		}
-		c.String(200, string(jdoc))
+		s:=string(jdoc)
+		c.String(200, s)
+		//c.JSON(200,doc)
 	}
 }
 func ReadId1(c *gin.Context) {
-	_, db := DbConnection()
+	db := config.Connection.Db
 	collectionName := config.Config.Arango.Collections.User
 	key := c.Param("id")
 	ctx := context.Background()
@@ -96,7 +95,7 @@ func ReadId1(c *gin.Context) {
 
 }
 func Remove1(c *gin.Context) {
-	_, db := DbConnection()
+	db :=config.Connection.Db
 	ctx := context.Background()
 	collectionName := config.Config.Arango.Collections.User
 	key := c.Param("id")
@@ -108,7 +107,7 @@ func Remove1(c *gin.Context) {
 	log.Info("Removed Succesfully")
 }
 func Update1(c *gin.Context) {
-	_, db := DbConnection()
+	db :=config.Connection.Db
 	ctx := context.Background()
 	var doc models.StudentDetails
 	_ = c.ShouldBindWith(&doc, binding.JSON)
